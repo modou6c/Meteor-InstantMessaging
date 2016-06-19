@@ -35,7 +35,7 @@ if (Meteor.isClient) {
 
     if (!chat){// no chat matching the filter - need to insert a new one
       
-        chatId = Meteor.call("addChat", userID, otherUserId);
+        chatId = Meteor.call("addChat", Meteor.userId(), otherUserId);
     }
     else {// there is a chat going already - use that. 
       chatId = chat._id;
@@ -81,6 +81,8 @@ if (Meteor.isClient) {
     }, 
 
   })
+
+
  Template.chat_page.events({
   // this event fires when the user sends a message on the chat page
   'submit .js-send-chat':function(event){
@@ -107,11 +109,15 @@ if (Meteor.isClient) {
       chat.messages = msgs;
       // update the chat object in the database.
       Meteor.call("addMessage", chat);
-      //Chats.update(chat._id, chat);
+
+      //emoticonize (by using elfoslav:css-emoticons )
+      setTimeout(function(){ $('.msg').emoticonize() }, 500);
     }
-  }
+  } // end submit
+
  })
-}
+
+} // end client
 
 
 
