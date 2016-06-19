@@ -1,6 +1,10 @@
 Chats = new Mongo.Collection("chats");
 
 if (Meteor.isClient) {
+
+  Meteor.subscribe('chats');
+  Meteor.subscribe('users');
+
   // set up the main template the the router will use to build pages
   Router.configure({
     layoutTemplate: 'ApplicationLayout'
@@ -25,7 +29,8 @@ if (Meteor.isClient) {
                 ]};
     var chat = Chats.findOne(filter);
     if (!chat){// no chat matching the filter - need to insert a new one
-      chatId = Chats.insert({user1Id:Meteor.userId(), user2Id:otherUserId});
+      
+        chatId = Meteor.call("addChat", otherUserId);
     }
     else {// there is a chat going already - use that. 
       chatId = chat._id;
@@ -96,11 +101,13 @@ if (Meteor.isClient) {
       // put the messages array onto the chat object
       chat.messages = msgs;
       // update the chat object in the database.
-      Chats.update(chat._id, chat);
+      Meteor.call("addMessage", chat);
+      //Chats.update(chat._id, chat);
     }
   }
  })
 }
+
 
 
 // start up script that creates some users for testing
@@ -119,4 +126,39 @@ if (Meteor.isServer) {
       }
     } 
   });
+
+// publish  - read access to collections 
+
+Meteor.publish("chats", function(){
+
+    return Chats.find({$or:[
+                {user1Id:this.userId}, 
+                {user2Id:this.userId}
+                ]});
+  });
+
+Meteor.publish("users", function(){
+
+    return Meteor.users.find();
+
+  });
 }
+
+/// MEthods
+Meteor.methods({
+
+  // adding a new chat
+  addChat:function(friendId){
+    
+    var id = Chats.insert({user1Id:this.userId, user2Id:friendId});
+    return id; 
+
+    
+  },  
+
+  // add a message
+  addMessage:function(chat){
+    Chats.update(chat._id, chat);
+  },
+
+});
