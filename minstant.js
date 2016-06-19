@@ -2,8 +2,8 @@ Chats = new Mongo.Collection("chats");
 
 if (Meteor.isClient) {
 
-  Meteor.subscribe('chats');
-  Meteor.subscribe('users');
+  Meteor.subscribe("chats");
+  Meteor.subscribe("users");
 
   // set up the main template the the router will use to build pages
   Router.configure({
@@ -18,19 +18,24 @@ if (Meteor.isClient) {
 
   // specify a route that allows the current user to chat to another users
   Router.route('/chat/:_id', function () {
+
+    
     // the user they want to chat to has id equal to 
     // the id sent in after /chat/... 
     var otherUserId = this.params._id;
     // find a chat that has two users that match current user id
     // and the requested user id
-    var filter = {$or:[
-                {user1Id:Meteor.userId(), user2Id:otherUserId}, 
-                {user2Id:Meteor.userId(), user1Id:otherUserId}
-                ]};
-    var chat = Chats.findOne(filter);
+  
+    var chat = Chats.findOne({
+                $or:[
+                {user1Id: Meteor.userId(), user2Id:otherUserId}, 
+                {user1Id:otherUserId, user2Id:Meteor.userId()}
+                ]
+              });
+
     if (!chat){// no chat matching the filter - need to insert a new one
       
-        chatId = Meteor.call("addChat", otherUserId);
+        chatId = Meteor.call("addChat", userID, otherUserId);
     }
     else {// there is a chat going already - use that. 
       chatId = chat._id;
@@ -148,12 +153,11 @@ Meteor.publish("users", function(){
 Meteor.methods({
 
   // adding a new chat
-  addChat:function(friendId){
+  addChat:function(userId, friendId){
     
-    var id = Chats.insert({user1Id:this.userId, user2Id:friendId});
+    var id = Chats.insert({user1Id:userId, user2Id:friendId});
     return id; 
 
-    
   },  
 
   // add a message

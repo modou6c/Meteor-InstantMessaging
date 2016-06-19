@@ -32,7 +32,11 @@
 
 <!-- Top level template for the lobby page -->
 <template name="lobby_page">
+	{{#if currentUser}}
 	{{> available_user_list}}
+	{{else}}
+		{{> home_view}}
+	{{/if}}
 </template>
 
 <!-- display a list of users -->
@@ -95,5 +99,12 @@
 	<br>
 </template>
 
+
+<!-- template show when the user is not logged in -->
+<template name="home_view">
+
+	<h2>Please Sign in to start chatting !</h2>
+
+</template>
 
 
