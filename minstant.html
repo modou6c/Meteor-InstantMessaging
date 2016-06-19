@@ -90,7 +90,8 @@
 
 <!-- simple template that displays a message -->
 <template name="chat_message">
-	someone said: {{text}}
+	<img src="/{{senderAvatar}}" class="img-circle small-avatar" /> &nbsp; {{senderName}}: {{text}}
+	<br>
 	<br>
 </template>
 
